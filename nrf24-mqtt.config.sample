@@ -1,0 +1,18 @@
+# example config file
+
+listen_address = "F0F0F0F0F0";
+
+# There should be more here, for data rate,
+# auto-ack, etc.  But I don't have that right
+# now.
+
+mqtt_host = "127.0.0.1";
+mqtt_port = 1883;
+mqtt_keepalive = 60;
+
+mqtt_map: (
+    { address = "AEAEAEAE00";
+      queue = "home.bedroom"; },
+    { address = "AEAEAEAE01";
+      queue = "home.office"; }
+)
