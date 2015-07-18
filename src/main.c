@@ -25,6 +25,7 @@
 #include "nrf24-mqtt.h"
 #include "debug.h"
 #include "cfg.h"
+#include "mqtt.h"
 
 #define DEFAULT_CONFIG_FILE "/etc/nrf24-mqtt.conf"
 
@@ -76,7 +77,22 @@ int main(int argc, char *argv[]) {
 
     mqtt_init();
 
-    sleep(1);
+    int count = 100;
+    while(count--) {
+        incoming_message_t msg;
+        msg.sensor_address.addr[0] = 0xAE;
+        msg.sensor_address.addr[1] = 0xAE;
+        msg.sensor_address.addr[2] = 0xAE;
+        msg.sensor_address.addr[3] = 0xAE;
+        msg.sensor_address.addr[4] = 0x00;
+
+        msg.sensor_message.type = SENSOR_TYPE_RO_SWITCH;
+        msg.sensor_message.type_instance = 0;
+        msg.sensor_message.value.uint8_value = count % 2;
+
+        mqtt_dispatch(&msg);
+        sleep(1);
+    }
 
     mqtt_deinit();
 

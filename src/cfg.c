@@ -105,11 +105,56 @@ int cfg_load(char *file) {
         }
     }
 
+    /* build the map */
+    setting = config_lookup(&cfg, "mqtt_map");
+    if(setting) {
+        addr_map_t *map;
+
+        int count = config_setting_length(setting);
+        for(int i = 0; i < count; i++) {
+            config_setting_t *entry = config_setting_get_elem(setting, i);
+            const char *c_addr, *c_name;
+
+            if(!config_setting_lookup_string(entry, "address", &c_addr)) {
+                ERROR("Missing address entry in mqtt_map");
+                exit(EXIT_FAILURE);
+            }
+
+            if(!config_setting_lookup_string(entry, "name", &c_name)) {
+                ERROR("Missing name entry in mqtt_map");
+                exit(EXIT_FAILURE);
+            }
+
+            map = (addr_map_t *)malloc(sizeof(addr_map_t));
+            if(!map) {
+                ERROR("Malloc error");
+                exit(EXIT_FAILURE);
+            }
+
+            map->sensor_name = strdup(c_name);
+            map->addr = cfg_addr_from_string(c_addr);
+
+            if(!map->sensor_name) {
+                ERROR("Malloc error");
+                exit(EXIT_FAILURE);
+            }
+
+            if(!map->addr) {
+                ERROR("Badly formatted address: %s", c_addr);
+                exit(EXIT_FAILURE);
+            }
+            map->next = config.map.next;
+            config.map.next = map;
+        }
+    }
+
     config_destroy(&cfg);
     return 0;
 }
 
 void cfg_dump(void) {
+    addr_map_t *pmap;
+
     DEBUG("Listen address: 0x%02x%02x%02x%02x%02x",
           config.listen_address->addr[0],
           config.listen_address->addr[1],
@@ -119,4 +164,26 @@ void cfg_dump(void) {
     DEBUG("MQTT Address: %s:%d", config.mqtt_host,
           config.mqtt_port);
     DEBUG("MQTT Keepalive: %d", config.mqtt_keepalive);
+    pmap = config.map.next;
+    while(pmap) {
+        DEBUG("Map 0x%02x%02x%02x%02x%02x -> %s",
+              pmap->addr->addr[0],
+              pmap->addr->addr[1],
+              pmap->addr->addr[2],
+              pmap->addr->addr[3],
+              pmap->addr->addr[4],
+              pmap->sensor_name);
+        pmap = pmap->next;
+    }
+}
+
+const char *cfg_find_map(sensor_address_t *addr) {
+    addr_map_t *pmap;
+    pmap = config.map.next;
+    while(pmap) {
+        if(memcmp(addr, pmap->addr, 5) == 0)
+            return pmap->sensor_name;
+        pmap = pmap->next;
+    }
+    return NULL;
 }

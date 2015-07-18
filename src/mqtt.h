@@ -18,7 +18,11 @@
 #ifndef _MQTT_H_
 #define _MQTT_H_
 
-extern int mqtt_init(void);
-extern int mqtt_deinit(void);
+#include <stdbool.h>
+#include "nrf24-mqtt.h"
+
+extern bool mqtt_init(void);
+extern bool mqtt_deinit(void);
+extern bool mqtt_dispatch(incoming_message_t *msg);
 
 #endif /* _MQTT_H_ */

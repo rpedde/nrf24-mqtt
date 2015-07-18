@@ -16,7 +16,7 @@ AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
 
 ALL_CFLAGS="-std=c99 -D_GNU_SOURCE"
-ALL_LDFLAGS="-lpthread"
+ALL_LDFLAGS="-lpthread -lmosquitto"
 
 AC_ARG_ENABLE(debug, [  --enable-debug                Enable debugging switches],
                        [ case "${enableval}" in

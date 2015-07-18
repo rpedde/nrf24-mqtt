@@ -29,17 +29,13 @@ typedef struct sensor_address_t {
 } sensor_address_t;
 
 typedef struct incoming_message_t {
-    sensor_struct_t sensor_message;
     sensor_address_t sensor_address;
+    sensor_struct_t sensor_message;
 } incoming_message_t;
 
-typedef struct addr_entry_t {
-    sensor_address_t addr;
-    char *sensor_name;
-} addr_entry_t;
-
 typedef struct addr_map_t {
-    addr_entry_t *entry;
+    sensor_address_t *addr;
+    char *sensor_name;
     struct addr_map_t *next;
 } addr_map_t;
 

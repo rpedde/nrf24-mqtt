@@ -23,7 +23,7 @@
 #define SENSOR_TYPE_RO_SWITCH   0  /* uint8: 0 or 1 */
 #define SENSOR_TYPE_RW_SWITCH   1  /* uint8: 0 or 1 */
 #define SENSOR_TYPE_TEMP        2  /* float */
-#define SENSOR_TYPE_HUMIDITY    3  /* double */
+#define SENSOR_TYPE_HUMIDITY    3  /* float */
 #define SENSOR_TYPE_LIGHT       4  /* uint8 (?) */
 #define SENSOR_TYPE_MOTION      5  /* uint8: 0 or 1 */
 #define SENSOR_TYPE_VOLTAGE     6  /* float, type_instance 0 is battery */

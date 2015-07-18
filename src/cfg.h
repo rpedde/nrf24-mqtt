@@ -29,12 +29,13 @@ typedef struct cfg_t {
 
     sensor_address_t *listen_address;
 
-    addr_map_t *map;
+    addr_map_t map;
 } cfg_t;
 
 extern cfg_t config;
 
 extern int cfg_load(char *file);
 extern void cfg_dump(void);
+extern const char *cfg_find_map(sensor_address_t *addr);
 
 #endif /* _CFG_H_ */
