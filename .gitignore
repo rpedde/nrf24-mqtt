@@ -16,3 +16,4 @@ m4
 .deps
 *.o
 stamp-h1
+src/nrf24-mqtt
