@@ -30,6 +30,7 @@
 
 #pragma pack(push, 1)
 typedef struct {
+    uint8_t addr[5];
     uint8_t type;
     uint8_t type_instance;
     union {

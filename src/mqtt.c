@@ -23,7 +23,6 @@
 #include <mosquitto.h>
 
 #include "nrf24-mqtt.h"
-#include "work_queue.h"
 #include "debug.h"
 #include "cfg.h"
 
@@ -39,33 +38,33 @@ char *mqtt_type_lookup[] = {
     "voltage"
 };
 
-void mqtt_dump_message(incoming_message_t *pmsg) {
+void mqtt_dump_message(sensor_struct_t *pmsg) {
     char *type;
 
     DEBUG("Address:      %02x%02x%02x%02x%02x",
-          pmsg->sensor_address.addr[0],
-          pmsg->sensor_address.addr[1],
-          pmsg->sensor_address.addr[2],
-          pmsg->sensor_address.addr[3],
-          pmsg->sensor_address.addr[4]);
-    if(pmsg->sensor_message.type > (sizeof(mqtt_type_lookup) / sizeof(char*))) {
+          pmsg->addr[0],
+          pmsg->addr[1],
+          pmsg->addr[2],
+          pmsg->addr[3],
+          pmsg->addr[4]);
+    if(pmsg->type > (sizeof(mqtt_type_lookup) / sizeof(char*))) {
         type = "unknown";
     } else {
-        type = mqtt_type_lookup[pmsg->sensor_message.type];
+        type = mqtt_type_lookup[pmsg->type];
     }
     DEBUG("Type:         %s", type);
-    DEBUG("Instance:     %d", pmsg->sensor_message.type_instance);
-    switch(pmsg->sensor_message.type) {
+    DEBUG("Instance:     %d", pmsg->type_instance);
+    switch(pmsg->type) {
     case SENSOR_TYPE_RO_SWITCH:
     case SENSOR_TYPE_RW_SWITCH:
     case SENSOR_TYPE_LIGHT:
     case SENSOR_TYPE_MOTION:
-        DEBUG("Value:        %d", pmsg->sensor_message.value.uint8_value);
+        DEBUG("Value:        %d", pmsg->value.uint8_value);
         break;
     case SENSOR_TYPE_TEMP:
     case SENSOR_TYPE_HUMIDITY:
     case SENSOR_TYPE_VOLTAGE:
-        DEBUG("Value:        %f", pmsg->sensor_message.value.float_value);
+        DEBUG("Value:        %f", pmsg->value.float_value);
         break;
     default:
         DEBUG("Value:        unknown");
@@ -98,7 +97,7 @@ bool mqtt_deinit(void) {
     return true;
 }
 
-bool mqtt_dispatch(incoming_message_t *pmsg) {
+bool mqtt_dispatch(sensor_struct_t *pmsg) {
     const char *sensor_name;
     char *topic;
     char *value;
@@ -108,41 +107,38 @@ bool mqtt_dispatch(incoming_message_t *pmsg) {
 
     mqtt_dump_message(pmsg);
 
-    sensor_name = cfg_find_map(&pmsg->sensor_address);
+    sensor_name = cfg_find_map(pmsg->addr);
 
     if(!sensor_name) {
         WARN("Got message from unknown sensor: %s", sensor_name);
-        free(pmsg);
         return true;
     }
 
-    if(pmsg->sensor_message.type > (sizeof(mqtt_type_lookup) / sizeof(char*))) {
+    if(pmsg->type > (sizeof(mqtt_type_lookup) / sizeof(char*))) {
         WARN("Unknown sensor type: %d from %s",
-             pmsg->sensor_message.type, sensor_name);
-        free(pmsg);
+             pmsg->type, sensor_name);
         return true;
     }
 
     asprintf(&topic, "%s/%s%d", sensor_name,
-             mqtt_type_lookup[pmsg->sensor_message.type],
-             pmsg->sensor_message.type_instance);
+             mqtt_type_lookup[pmsg->type],
+             pmsg->type_instance);
 
-    switch(pmsg->sensor_message.type) {
+    switch(pmsg->type) {
     case SENSOR_TYPE_RO_SWITCH:
     case SENSOR_TYPE_RW_SWITCH:
     case SENSOR_TYPE_LIGHT:
     case SENSOR_TYPE_MOTION:
-        asprintf(&value, "%d", pmsg->sensor_message.value.uint8_value);
+        asprintf(&value, "%d", pmsg->value.uint8_value);
         break;
     case SENSOR_TYPE_TEMP:
     case SENSOR_TYPE_HUMIDITY:
     case SENSOR_TYPE_VOLTAGE:
-        asprintf(&value, "%f", pmsg->sensor_message.value.float_value);
+        asprintf(&value, "%f", pmsg->value.float_value);
         break;
     default:
-        ERROR("Unhandled sensor type: %d", pmsg->sensor_message.type);
+        ERROR("Unhandled sensor type: %d", pmsg->type);
         free(topic);
-        free(pmsg);
         return true;
     }
 

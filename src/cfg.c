@@ -40,14 +40,14 @@ static int cfg_hex_digit(const char digit) {
     return -1;
 }
 
-static sensor_address_t *cfg_addr_from_string(const char *hex) {
-    sensor_address_t *retval;
+static uint8_t *cfg_addr_from_string(const char *hex) {
+    uint8_t *retval;
     int pos;
 
     if(strlen(hex) != 10)
         return NULL;
 
-    retval = (sensor_address_t *)malloc(sizeof(sensor_address_t));
+    retval = (uint8_t *)malloc(5);
     if(!retval) {
         perror("malloc");
         return NULL;
@@ -62,7 +62,7 @@ static sensor_address_t *cfg_addr_from_string(const char *hex) {
             return NULL;
         }
 
-        retval->addr[pos] = (uint8_t)((high << 4) | low);
+        retval[pos] = (uint8_t)((high << 4) | low);
     }
 
     return retval;
@@ -156,28 +156,28 @@ void cfg_dump(void) {
     addr_map_t *pmap;
 
     DEBUG("Listen address: 0x%02x%02x%02x%02x%02x",
-          config.listen_address->addr[0],
-          config.listen_address->addr[1],
-          config.listen_address->addr[2],
-          config.listen_address->addr[3],
-          config.listen_address->addr[4]);
+          config.listen_address[0],
+          config.listen_address[1],
+          config.listen_address[2],
+          config.listen_address[3],
+          config.listen_address[4]);
     DEBUG("MQTT Address: %s:%d", config.mqtt_host,
           config.mqtt_port);
     DEBUG("MQTT Keepalive: %d", config.mqtt_keepalive);
     pmap = config.map.next;
     while(pmap) {
         DEBUG("Map 0x%02x%02x%02x%02x%02x -> %s",
-              pmap->addr->addr[0],
-              pmap->addr->addr[1],
-              pmap->addr->addr[2],
-              pmap->addr->addr[3],
-              pmap->addr->addr[4],
+              pmap->addr[0],
+              pmap->addr[1],
+              pmap->addr[2],
+              pmap->addr[3],
+              pmap->addr[4],
               pmap->sensor_name);
         pmap = pmap->next;
     }
 }
 
-const char *cfg_find_map(sensor_address_t *addr) {
+const char *cfg_find_map(uint8_t *addr) {
     addr_map_t *pmap;
     pmap = config.map.next;
     while(pmap) {

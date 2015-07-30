@@ -27,7 +27,7 @@ typedef struct cfg_t {
     uint16_t mqtt_port;
     uint16_t mqtt_keepalive;
 
-    sensor_address_t *listen_address;
+    uint8_t *listen_address;
 
     addr_map_t map;
 } cfg_t;
@@ -36,6 +36,6 @@ extern cfg_t config;
 
 extern int cfg_load(char *file);
 extern void cfg_dump(void);
-extern const char *cfg_find_map(sensor_address_t *addr);
+extern const char *cfg_find_map(uint8_t *addr);
 
 #endif /* _CFG_H_ */

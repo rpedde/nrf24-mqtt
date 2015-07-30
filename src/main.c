@@ -33,8 +33,8 @@ void usage(char *a0) {
     fprintf(stderr, "Usage: %s [args]\n\n", a0);
     fprintf(stderr, "Valid args:\n\n");
     fprintf(stderr, " -c <configfile>     config file to load\n");
-    fprintf(stderr, " -d                  daemonize\n");
-    fprintf(stderr, " -v <level>          verbose level (1-5)\n");
+    fprintf(stderr, " -b                  background (daemonize)\n");
+    fprintf(stderr, " -d <level>          debug level (1-5)\n");
     fprintf(stderr, "\n");
 }
 
@@ -45,15 +45,15 @@ int main(int argc, char *argv[]) {
 
     char *configfile = DEFAULT_CONFIG_FILE;
 
-    while((opt = getopt(argc, argv, "c:dv:")) != -1) {
+    while((opt = getopt(argc, argv, "c:bd:")) != -1) {
         switch(opt) {
         case 'c':
             configfile = optarg;
             break;
-        case 'd':
+        case 'b':
             daemonize = TRUE;
             break;
-        case 'v':
+        case 'd':
             verbose_level = atoi(optarg);
             break;
         default:
@@ -77,23 +77,15 @@ int main(int argc, char *argv[]) {
 
     mqtt_init();
 
-    int count = 100;
-    while(count--) {
-        incoming_message_t msg;
-        msg.sensor_address.addr[0] = 0xAE;
-        msg.sensor_address.addr[1] = 0xAE;
-        msg.sensor_address.addr[2] = 0xAE;
-        msg.sensor_address.addr[3] = 0xAE;
-        msg.sensor_address.addr[4] = 0x00;
+    DEBUG("Starting receive thread");
 
-        msg.sensor_message.type = SENSOR_TYPE_RO_SWITCH;
-        msg.sensor_message.type_instance = 0;
-        msg.sensor_message.value.uint8_value = count % 2;
+    nrf24_recv_init();
 
-        mqtt_dispatch(&msg);
+    while(1) {
         sleep(1);
     }
 
+    nrf24_recv_deinit();
     mqtt_deinit();
 
     return(EXIT_SUCCESS);

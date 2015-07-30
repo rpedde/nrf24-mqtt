@@ -1,5 +1,5 @@
 /*
- * mqtt.h Copyright (C) 2015 Ron Pedde <ron@pedde.com>
+ * nrf24-recv.h Copyright (C) 2015 Ron Pedde <ron@pedde.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MQTT_H_
-#define _MQTT_H_
+#ifndef _NRF24_RECV_H_
+#define _NRF24_RECV_H_
 
 #include <stdbool.h>
 #include "nrf24-mqtt.h"
-#include "sensor.h"
 
-extern bool mqtt_init(void);
-extern bool mqtt_deinit(void);
-extern bool mqtt_dispatch(sensor_struct_t *msg);
+extern bool nrf24_recv_init(void);
+extern bool nrf24_recv_deinit(void);
 
-#endif /* _MQTT_H_ */
+#endif /* _NRF24_RECV_H_ */
