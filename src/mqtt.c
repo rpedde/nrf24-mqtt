@@ -40,6 +40,7 @@ char *mqtt_type_lookup[] = {
 
 void mqtt_dump_message(sensor_struct_t *pmsg) {
     char *type;
+    uint8_t *ptr;
 
     DEBUG("Address:      %02x%02x%02x%02x%02x",
           pmsg->addr[0],
@@ -54,6 +55,7 @@ void mqtt_dump_message(sensor_struct_t *pmsg) {
     }
     DEBUG("Type:         %s", type);
     DEBUG("Instance:     %d", pmsg->type_instance);
+    DEBUG("Model:        %d", pmsg->model);
     switch(pmsg->type) {
     case SENSOR_TYPE_RO_SWITCH:
     case SENSOR_TYPE_RW_SWITCH:
@@ -63,6 +65,9 @@ void mqtt_dump_message(sensor_struct_t *pmsg) {
         break;
     case SENSOR_TYPE_TEMP:
     case SENSOR_TYPE_HUMIDITY:
+        ptr = &pmsg->value.uint8_value;
+        DEBUG("Value:        %d (%02x %02x)", pmsg->value.uint16_value, ptr[0], ptr[1]);
+        break;
     case SENSOR_TYPE_VOLTAGE:
         DEBUG("Value:        %f", pmsg->value.float_value);
         break;
@@ -131,10 +136,38 @@ bool mqtt_dispatch(sensor_struct_t *pmsg) {
     case SENSOR_TYPE_MOTION:
         asprintf(&value, "%d", pmsg->value.uint8_value);
         break;
-    case SENSOR_TYPE_TEMP:
-    case SENSOR_TYPE_HUMIDITY:
     case SENSOR_TYPE_VOLTAGE:
         asprintf(&value, "%f", pmsg->value.float_value);
+        break;
+    case SENSOR_TYPE_TEMP:
+        if (pmsg->model == SENSOR_MODEL_DHT11) {
+            asprintf(&value, "%d.%d", (pmsg->value.uint16_value >> 8),
+                     pmsg->value.uint16_value & 0xFF00);
+        } else if (pmsg->model == SENSOR_MODEL_DHT22) {
+            float t_float=0.0;
+
+            if(pmsg->value.uint16_value & 0x8000) {
+                t_float = -(pmsg->value.uint16_value & 0x7fff);
+            } else {
+                t_float = pmsg->value.uint16_value;
+            }
+
+            t_float = (t_float / 10.0) * 1.8 + 32.0;
+
+            asprintf(&value, "%02.1f", t_float);
+        } else {
+            ERROR("Unhandled temp model: %d", pmsg->model);
+        }
+        break;
+    case SENSOR_TYPE_HUMIDITY:
+        if (pmsg->model == SENSOR_MODEL_DHT11) {
+            asprintf(&value, "%d.%d", (pmsg->value.uint16_value >> 8),
+                     pmsg->value.uint16_value & 0xFF00);
+        } else if (pmsg->model == SENSOR_MODEL_DHT22) {
+            asprintf(&value, "%0.1f", pmsg->value.uint16_value / 10.0);
+        } else {
+            ERROR("Unhandled temp model: %d", pmsg->model);
+        }
         break;
     default:
         ERROR("Unhandled sensor type: %d", pmsg->type);

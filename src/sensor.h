@@ -22,16 +22,25 @@
 
 #define SENSOR_TYPE_RO_SWITCH   0  /* uint8: 0 or 1 */
 #define SENSOR_TYPE_RW_SWITCH   1  /* uint8: 0 or 1 */
-#define SENSOR_TYPE_TEMP        2  /* float */
-#define SENSOR_TYPE_HUMIDITY    3  /* float */
+#define SENSOR_TYPE_TEMP        2  /* model specific */
+#define SENSOR_TYPE_HUMIDITY    3  /* model specific */
 #define SENSOR_TYPE_LIGHT       4  /* uint8 (?) */
 #define SENSOR_TYPE_MOTION      5  /* uint8: 0 or 1 */
 #define SENSOR_TYPE_VOLTAGE     6  /* float, type_instance 0 is battery */
 
+#define SENSOR_MODEL_NONE       0
+#define SENSOR_MODEL_DHT11      1
+#define SENSOR_MODEL_DHT22      2
+#define SENSOR_MODEL_DS18B20    3
+#define SENSOR_MODEL_TMP36      4
+
+#ifndef __AVR__
 #pragma pack(push, 1)
+#endif
 typedef struct {
     uint8_t addr[5];
     uint8_t type;
+    uint8_t model;
     uint8_t type_instance;
     union {
         uint8_t uint8_value;
@@ -39,6 +48,8 @@ typedef struct {
         float float_value;
     } value;
 } sensor_struct_t;
+#ifndef __AVR__
 #pragma pack(pop)
+#endif
 
 #endif /* __SENSOR_H__ */
