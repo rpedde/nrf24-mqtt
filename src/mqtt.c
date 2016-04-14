@@ -104,8 +104,8 @@ bool mqtt_deinit(void) {
 
 bool mqtt_dispatch(sensor_struct_t *pmsg) {
     const char *sensor_name;
-    char *topic;
-    char *value;
+    char *topic=NULL;
+    char *value=NULL;
     int rc;
 
     DEBUG("Got work item");
@@ -141,8 +141,9 @@ bool mqtt_dispatch(sensor_struct_t *pmsg) {
         break;
     case SENSOR_TYPE_TEMP:
         if (pmsg->model == SENSOR_MODEL_DHT11) {
-            asprintf(&value, "%d.%d", (pmsg->value.uint16_value >> 8),
-                     pmsg->value.uint16_value & 0xFF00);
+            float t_float = (pmsg->value.uint16_value >> 8) * 1.8 + 32.0;
+
+            asprintf(&value, "%02.1f", t_float);
         } else if (pmsg->model == SENSOR_MODEL_DHT22) {
             float t_float=0.0;
 
@@ -161,7 +162,7 @@ bool mqtt_dispatch(sensor_struct_t *pmsg) {
         break;
     case SENSOR_TYPE_HUMIDITY:
         if (pmsg->model == SENSOR_MODEL_DHT11) {
-            asprintf(&value, "%d.%d", (pmsg->value.uint16_value >> 8),
+            asprintf(&value, "%0d.%01d", (pmsg->value.uint16_value >> 8),
                      pmsg->value.uint16_value & 0xFF00);
         } else if (pmsg->model == SENSOR_MODEL_DHT22) {
             asprintf(&value, "%0.1f", pmsg->value.uint16_value / 10.0);
@@ -182,8 +183,11 @@ bool mqtt_dispatch(sensor_struct_t *pmsg) {
     if (rc != MOSQ_ERR_SUCCESS)
         ERROR("Got mosquitto error: %d", rc);
 
-    free(topic);
-    free(value);
+    if(topic)
+        free(topic);
+
+    if(value)
+        free(value);
 
     return true;
 }
