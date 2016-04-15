@@ -28,11 +28,15 @@
 #define SENSOR_TYPE_MOTION      5  /* uint8: 0 or 1 */
 #define SENSOR_TYPE_VOLTAGE     6  /* float, type_instance 0 is battery */
 
-#define SENSOR_MODEL_NONE       0
-#define SENSOR_MODEL_DHT11      1
-#define SENSOR_MODEL_DHT22      2
-#define SENSOR_MODEL_DS18B20    3
-#define SENSOR_MODEL_TMP36      4
+#define SENSOR_MODEL_NONE     0
+
+#define VOLT_MODEL_8B_2X33VREF  0
+
+#define TEMP_MODEL_NONE       0
+#define TEMP_MODEL_DHT11      1
+#define TEMP_MODEL_DHT22      2
+#define TEMP_MODEL_DS18B20    3
+#define TEMP_MODEL_TMP36      4
 
 #ifndef __AVR__
 #pragma pack(push, 1)

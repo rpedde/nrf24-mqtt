@@ -69,7 +69,7 @@ void mqtt_dump_message(sensor_struct_t *pmsg) {
         DEBUG("Value:        %d (%02x %02x)", pmsg->value.uint16_value, ptr[0], ptr[1]);
         break;
     case SENSOR_TYPE_VOLTAGE:
-        DEBUG("Value:        %f", pmsg->value.float_value);
+        DEBUG("Value:        %d", pmsg->value.uint8_value);
         break;
     default:
         DEBUG("Value:        unknown");
@@ -137,14 +137,15 @@ bool mqtt_dispatch(sensor_struct_t *pmsg) {
         asprintf(&value, "%d", pmsg->value.uint8_value);
         break;
     case SENSOR_TYPE_VOLTAGE:
-        asprintf(&value, "%f", pmsg->value.float_value);
+        if (pmsg->model == VOLT_MODEL_8B_2X33VREF)
+            asprintf(&value, "%1.1f", 6.6 * pmsg->value.uint8_value / 255);
         break;
     case SENSOR_TYPE_TEMP:
-        if (pmsg->model == SENSOR_MODEL_DHT11) {
+        if (pmsg->model == TEMP_MODEL_DHT11) {
             float t_float = (pmsg->value.uint16_value >> 8) * 1.8 + 32.0;
 
             asprintf(&value, "%02.1f", t_float);
-        } else if (pmsg->model == SENSOR_MODEL_DHT22) {
+        } else if (pmsg->model == TEMP_MODEL_DHT22) {
             float t_float=0.0;
 
             if(pmsg->value.uint16_value & 0x8000) {
@@ -161,10 +162,10 @@ bool mqtt_dispatch(sensor_struct_t *pmsg) {
         }
         break;
     case SENSOR_TYPE_HUMIDITY:
-        if (pmsg->model == SENSOR_MODEL_DHT11) {
+        if (pmsg->model == TEMP_MODEL_DHT11) {
             asprintf(&value, "%0d.%01d", (pmsg->value.uint16_value >> 8),
                      pmsg->value.uint16_value & 0xFF00);
-        } else if (pmsg->model == SENSOR_MODEL_DHT22) {
+        } else if (pmsg->model == TEMP_MODEL_DHT22) {
             asprintf(&value, "%0.1f", pmsg->value.uint16_value / 10.0);
         } else {
             ERROR("Unhandled temp model: %d", pmsg->model);
@@ -177,11 +178,15 @@ bool mqtt_dispatch(sensor_struct_t *pmsg) {
     }
 
     /* send the message */
-    DEBUG("Sending message %s -> %s", topic, value);
+    if(value) {
+        DEBUG("Sending message %s -> %s", topic, value);
 
-    rc = mosquitto_publish(mosq, NULL, topic, strlen(value), value, 0, true);
-    if (rc != MOSQ_ERR_SUCCESS)
-        ERROR("Got mosquitto error: %d", rc);
+        rc = mosquitto_publish(mosq, NULL, topic, strlen(value), value, 0, true);
+        if (rc != MOSQ_ERR_SUCCESS)
+            ERROR("Got mosquitto error: %d", rc);
+    } else {
+        WARN("Unhandled message");
+    }
 
     if(topic)
         free(topic);
