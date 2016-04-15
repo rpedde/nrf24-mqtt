@@ -138,7 +138,7 @@ bool mqtt_dispatch(sensor_struct_t *pmsg) {
         break;
     case SENSOR_TYPE_VOLTAGE:
         if (pmsg->model == VOLT_MODEL_8B_2X33VREF)
-            asprintf(&value, "%1.1f", 6.6 * pmsg->value.uint8_value / 255);
+            asprintf(&value, "%1.2f", 6.6 * pmsg->value.uint8_value / 255);
         break;
     case SENSOR_TYPE_TEMP:
         if (pmsg->model == TEMP_MODEL_DHT11) {
