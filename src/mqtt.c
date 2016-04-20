@@ -69,7 +69,11 @@ void mqtt_dump_message(sensor_struct_t *pmsg) {
         DEBUG("Value:        %d (%02x %02x)", pmsg->value.uint16_value, ptr[0], ptr[1]);
         break;
     case SENSOR_TYPE_VOLTAGE:
-        DEBUG("Value:        %d", pmsg->value.uint8_value);
+        if (pmsg->model == VOLT_MODEL_8B_2X33VREF) {
+            DEBUG("Value:        %d (8bit)", pmsg->value.uint8_value);
+        } else {
+            DEBUG("Value:        %d (16bit)", pmsg->value.uint16_value);
+        }
         break;
     default:
         DEBUG("Value:        unknown");
@@ -139,6 +143,8 @@ bool mqtt_dispatch(sensor_struct_t *pmsg) {
     case SENSOR_TYPE_VOLTAGE:
         if (pmsg->model == VOLT_MODEL_8B_2X33VREF)
             asprintf(&value, "%1.2f", 6.6 * pmsg->value.uint8_value / 255);
+        if (pmsg->model == VOLT_MODEL_16B_2X33VREF)
+            asprintf(&value, "%1.3f", 6.6 * pmsg->value.uint16_value / 65535);
         break;
     case SENSOR_TYPE_TEMP:
         if (pmsg->model == TEMP_MODEL_DHT11) {

@@ -30,7 +30,8 @@
 
 #define SENSOR_MODEL_NONE     0
 
-#define VOLT_MODEL_8B_2X33VREF  0
+#define VOLT_MODEL_8B_2X33VREF   0
+#define VOLT_MODEL_16B_2X33VREF  1
 
 #define TEMP_MODEL_NONE       0
 #define TEMP_MODEL_DHT11      1
