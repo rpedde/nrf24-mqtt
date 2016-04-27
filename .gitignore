@@ -12,7 +12,6 @@ missing
 Makefile
 Makefile.in
 libtool
-m4
 .deps
 *.o
 stamp-h1
