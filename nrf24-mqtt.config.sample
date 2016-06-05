@@ -1,6 +1,6 @@
 # example config file
 
-listen_address = "F0F0F0F0F0";
+listen_address = "AEAEAEAEAE";
 
 # There should be more here, for data rate,
 # auto-ack, etc.  But I don't have that right
@@ -12,7 +12,7 @@ mqtt_keepalive = 60;
 
 mqtt_map: (
     { address = "AEAEAEAE00";
-      queue = "home.bedroom"; },
+      name = "home.bedroom"; },
     { address = "AEAEAEAE01";
-      queue = "home.office"; }
+      name = "home.office"; }
 )

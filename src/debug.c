@@ -28,6 +28,13 @@ void debug_level(int newlevel) {
 }
 
 
+void debug_vprintf(int level, char *format, va_list ap) {
+    if(level > debug_threshold)
+        return;
+
+    vfprintf(stderr, format, ap);
+}
+
 void debug_printf(int level, char *format, ...) {
     va_list args;
     if(level > debug_threshold)

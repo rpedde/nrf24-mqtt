@@ -60,5 +60,6 @@
 
 extern void debug_level(int newlevel);
 extern void debug_printf(int level, char *format, ...);
+extern void debug_vprintf(int level, char *format, va_list ap);
 
 #endif /* _DEBUG_H_ */

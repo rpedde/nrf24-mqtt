@@ -19,7 +19,6 @@
 #define _NRF24_RECV_H_
 
 #include <stdbool.h>
-#include "nrf24-mqtt.h"
 
 extern bool nrf24_recv_init(void);
 extern bool nrf24_recv_deinit(void);

@@ -22,6 +22,7 @@
 
 #include <libconfig.h>
 
+#include "nrf24-recv.h"
 #include "nrf24-mqtt.h"
 #include "debug.h"
 #include "cfg.h"
@@ -79,7 +80,10 @@ int main(int argc, char *argv[]) {
 
     DEBUG("Starting receive thread");
 
-    nrf24_recv_init();
+    if(!nrf24_recv_init()) {
+        ERROR("Error starting radio receiver.  Abort");
+        exit(EXIT_FAILURE);
+    }
 
     while(1) {
         sleep(1);
